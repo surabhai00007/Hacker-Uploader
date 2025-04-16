@@ -444,7 +444,7 @@ async def account_login(bot: Client, m: Message):
                             f"│   ├── 🎞️ Quality: {raw_text2}\n"
                             f"│   ├── 🔗 URL: Chill maar bhai 😎\n"
                             f"│   └── 🖼️ Thumbnail: {input6.text}\n"
-                            f"└── 🤖 Powered by: [мʳ н𝕖Ｌℙ𝐞ｒ](https://t.me/urban_rider2007)\n\n"
+                            f"└── 🤖 Powered by:SAKSHAM \n\n"
                             f"✅ File is downloading... Please wait ⏳"
                         )
                    prog = await m.reply_text(Show)
@@ -468,7 +468,7 @@ async def account_login(bot: Client, m: Message):
                             f"│   ├── 🎞️ Quality: {raw_text2}\n"
                             f"│   ├── 🔗 URL: Chill maar bhai 😎\n"
                             f"│   └── 🖼️ Thumbnail: {input6.text}\n"
-                            f"└── 🤖 Powered by: [мʳ н𝕖Ｌℙ𝐞ｒ](https://t.me/urban_rider2007)\n\n"
+                            f"└── 🤖 Powered by: SAKSHAM\n\n"
                             f"✅ File is downloading... Please wait ⏳"
                         )
                     prog = await m.reply_text(Show)
@@ -495,7 +495,7 @@ async def account_login(bot: Client, m: Message):
                             f"│   ├── 🎞️ Quality: {raw_text2}\n"
                             f"│   ├── 🔗 URL: Chill maar bhai 😎\n"
                             f"│   └── 🖼️ Thumbnail: {input6.text}\n"
-                            f"└── 🤖 Powered by: [мʳ н𝕖Ｌℙ𝐞ｒ](https://t.me/urban_rider2007)\n\n"
+                            f"└── 🤖 Powered by: SAKSHAM\n\n"
                             f"✅ File is downloading... Please wait ⏳"
                         )
                     prog = await m.reply_text(Show)
@@ -508,7 +508,7 @@ async def account_login(bot: Client, m: Message):
 
             except Exception as e:
                 await m.reply_text(
-                    f"**downloading failed [🚀 мʳ н𝕖Ｌℙ𝐞ｒ 🚀](tg://user?id=7168441486)**\n\n{str(e)}\n\n**Name** - {name}\n"
+                    f"**downloading failed **\n\n{str(e)}\n\n**Name** - {name}\n"
                 )
                 count += 1
                 continue
