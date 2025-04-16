@@ -108,7 +108,7 @@ async def progress_bar(current, total, reply, start):
                     f"│   ├── 🗂️ Loaded: {cur}\n"
                     f"│   ├── 🤏 Size: {tot}\n"
                     f"│   └── ⏳ ETA: {eta}\n"
-                    f"└── 🚀 Bot By: [мʳ н𝕖Ｌℙ𝐞ｒ](t.me/urban_rider2007)"
+                    f"└── 🚀 Bot By: SAKSHAM"
                 )
 
                 await reply.edit(uploadeing_text)
