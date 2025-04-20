@@ -184,7 +184,7 @@ async def account_login(bot: Client, m: Message):
     raw_text3 = input3.text
 
     if raw_text3 == 'df':
-        MR = "[🚀 мʳ н𝕖Ｌℙ𝐞ｒ 🚀](t.me/urban_rider2007)"
+        MR = " S A K S H A M "
     else:
         MR = raw_text3
     await input3.delete(True)
