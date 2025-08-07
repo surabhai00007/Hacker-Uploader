@@ -1,110 +1,107 @@
-# full_helper.py
 import os
-import zipfile
-import shutil
 import subprocess
-import aiofiles
-import aiohttp
+import mmap
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from io import BytesIO
 import logging
+import subprocess
+import datetime
+import asyncio
+import os
+import requests
+import time
+from p_bar import progress_bar
+import aiohttp
+import aiofiles
+import tgcrypto
+import concurrent.futures
+from pyrogram.types import Message
+from pyrogram import Client, filters
+from pathlib import Path
+import re
 from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+from base64 import b64decode
+from pyrogram.enums import ParseMode
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Same AES Key aur IV jo encryption ke liye use kiya tha
+KEY = b'^#^#&@*HDU@&@*()'
+IV = b'^@%#&*NSHUE&$*#)'
 
-# AES KEY और IV को env से लेंगे (Render या .env से)
-AES_KEY = os.getenv("AES_KEY", "0000000000000000").encode()
-AES_IV = os.getenv("AES_IV", "0000000000000000").encode()
+# Decryption function
+def dec_url(enc_url):
+    enc_url = enc_url.replace("helper://", "")  # "helper://" prefix hatao
+    cipher = AES.new(KEY, AES.MODE_CBC, IV)
+    decrypted = unpad(cipher.decrypt(b64decode(enc_url)), AES.block_size)
+    return decrypted.decode('utf-8')
 
+# Function to split name & Encrypted URL properly
+def split_name_enc_url(line):
+    match = re.search(r"(helper://\S+)", line)  # Find helper:// ke baad ka encrypted URL
+    if match:
+        name = line[:match.start()].strip().rstrip(":")  # Encrypted URL se pehle ka text
+        enc_url = match.group(1).strip()  # Sirf Encrypted URL
+        return name, enc_url
+    return line.strip(), None  # Agar encrypted URL nahi mila, to pura line name maan lo
 
-def extract_zip(zip_path, extract_to):
-    try:
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_to)
-        logger.info(f"✅ ZIP extracted to: {extract_to}")
-    except Exception as e:
-        logger.error(f"❌ Failed to extract zip: {e}")
+# Function to decrypt file URLs
+def decrypt_file_txt(input_file):
+    output_file = "decrypted_" + input_file  # Output file ka naam
 
+    # Ensure the directory exists
+    output_dir = os.path.dirname(output_file)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-def decrypt_file(input_path, output_path):
-    try:
-        cipher = AES.new(AES_KEY, AES.MODE_CBC, AES_IV)
-        with open(input_path, 'rb') as f:
-            encrypted = f.read()
-        decrypted = cipher.decrypt(encrypted)
-        with open(output_path, 'wb') as f:
-            f.write(decrypted)
-        logger.info(f"🔓 Decrypted file: {input_path}")
-    except Exception as e:
-        logger.error(f"❌ Failed to decrypt file: {e}")
+    with open(input_file, "r", encoding="utf-8") as f, open(output_file, "w", encoding="utf-8") as out:
+        for line in f:
+            name, enc_url = split_name_enc_url(line)  # Sahi tarike se name aur encrypted URL split karo
+            if enc_url:
+                dec = dec_url(enc_url)  # Decrypt URL
+                out.write(f"{name}: {dec}\n")  # Ek hi : likho
+            else:
+                out.write(line.strip() + "\n")  # Agar encrypted URL nahi mila to line jaisa hai waisa likho
 
+    return output_file  # Decrypted file ka naam return karega
 
-def merge_ts_to_mp4(ts_dir, output_path):
-    try:
-        ts_files = sorted(f for f in os.listdir(ts_dir) if f.endswith('.ts'))
-        if not ts_files:
-            logger.warning("⚠️ No TS files found to merge.")
-            return False
+def duration(filename):
+    result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                             "format=duration", "-of",
+                             "default=noprint_wrappers=1:nokey=1", filename],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    return float(result.stdout)
 
-        list_file = os.path.join(ts_dir, "ts_list.txt")
-        with open(list_file, 'w') as f:
-            for ts in ts_files:
-                f.write(f"file '{os.path.join(ts_dir, ts)}'\n")
+def get_mps_and_keys(api_url):
+    response = requests.get(api_url)
+    response_json = response.json()
+    mpd = response_json.get('MPD')
+    keys = response_json.get('KEYS')
+    return mpd, keys
 
-        cmd = [
-            "ffmpeg", "-f", "concat", "-safe", "0",
-            "-i", list_file, "-c", "copy", output_path
-        ]
-        subprocess.run(cmd, check=True)
-        logger.info(f"🎬 Merged to MP4: {output_path}")
-        return True
-    except Exception as e:
-        logger.error(f"❌ Merge failed: {e}")
-        return False
-
-
-async def download_file(session, url, save_path):
-    try:
+def exec(cmd):
+        process = subprocess.run(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        output = process.stdout.decode()
+        print(output)
+        return output
+        #err = process.stdout.decode()
+def pull_run(work, cmds):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=work) as executor:
+        print("Waiting for tasks to complete")
+        fut = executor.map(exec,cmds)
+async def aio(url,name):
+    k = f'{name}.pdf'
+    async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status == 200:
-                async with aiofiles.open(save_path, 'wb') as f:
-                    await f.write(await resp.read())
-                logger.info(f"⬇️ Downloaded file: {save_path}")
-                return save_path
-            else:
-                logger.error(f"❌ HTTP Error {resp.status} for {url}")
-    except Exception as e:
-        logger.error(f"❌ Download error: {e}")
-    return None
+                f = await aiofiles.open(k, mode='wb')
+                await f.write(await resp.read())
+                await f.close()
+    return k
 
 
-async def process_zip_from_url(zip_url, output_dir="output"):
-    os.makedirs(output_dir, exist_ok=True)
-    temp_zip = os.path.join(output_dir, "temp.zip")
-
-    async with aiohttp.ClientSession() as session:
-        downloaded = await download_file(session, zip_url, temp_zip)
-        if not downloaded:
-            return None
-
-    extracted_dir = os.path.join(output_dir, "unzipped")
-    os.makedirs(extracted_dir, exist_ok=True)
-
-    extract_zip(temp_zip, extracted_dir)
-
-    # Optional decryption loop
-    for root, dirs, files in os.walk(extracted_dir):
-        for file in files:
-            if file.endswith(".ts.enc"):
-                enc_path = os.path.join(root, file)
-                dec_path = os.path.join(root, file.replace(".enc", ""))
-                decrypt_file(enc_path, dec_path)
-                os.remove(enc_path)
-
-    final_video = os.path.join(output_dir, "merged_output.mp4")
-    merged = merge_ts_to_mp4(extracted_dir, final_video)
-
-    os.remove(temp_zip)
-    shutil.rmtree(extracted_dir, ignore_errors=True)
-
-    return final_video if merged else None
+async def download(url,name):
+    ka = f'{name}.pdf'
+    async with aiohttp.ClientSession() as session:
