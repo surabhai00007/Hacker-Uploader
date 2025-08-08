@@ -98,19 +98,19 @@ async def txt_handler(bot: Client, m: Message):
     file_name, ext = os.path.splitext(os.path.basename(y))
 
     # Step 3: If encrypted file, decrypt first
-    if file_name.startswith("encrypted_"):
-        x = decrypt_file_txt(y)
-        await input_msg.delete(True)
+if file_name.startswith("encrypted_"):
+    x = decrypt_file_txt(y)
+    await input_msg.delete(True)
 else:
-        x = y
+    x = y
 
-    path = f"./downloads/{m.chat.id}"
+path = f"./downloads/{m.chat.id}"
 
-    try:
-        with open(x, "r") as f:
-            content = f.read()
-        content = content.split("\n")
-        links = []
+try:
+    with open(x, "r") as f:
+        content = f.read()
+    content = content.split("\n")
+    links = []
         for i in content:
             if i.strip():
                 links.append(i.strip())
