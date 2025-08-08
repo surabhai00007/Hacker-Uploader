@@ -209,8 +209,9 @@ async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name
         cmd4 = f'ffmpeg -i "{output_path}/video.mp4" -i "{output_path}/audio.m4a" -c copy "{output_path}/{output_name}.mp4"'
         print(f"Running command: {cmd4}")
         os.system(cmd4)
+
         if (output_path / "video.mp4").exists():
-(output_path / "video.mp4").unlink()
+            (output_path / "video.mp4").unlink()
         if (output_path / "audio.m4a").exists():
             (output_path / "audio.m4a").unlink()
 
@@ -229,11 +230,13 @@ async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name
         print(f"Error during decryption and merging: {str(e)}")
         raise
 
+
 async def run(cmd):
     proc = await asyncio.create_subprocess_shell(
         cmd,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE)
+        stderr=asyncio.subprocess.PIPE
+    )
 
     stdout, stderr = await proc.communicate()
 
@@ -246,9 +249,7 @@ async def run(cmd):
         return f'[stderr]\n{stderr.decode()}'
 
 
-
-
-def old_download(url, file_name, chunk_size = 1024 * 10):
+def old_download(url, file_name, chunk_size=1024 * 10):
     if os.path.exists(file_name):
         os.remove(file_name)
     r = requests.get(url, allow_redirects=True, stream=True)
