@@ -438,7 +438,7 @@ async def watermark_pdf(file_path, watermark_text):
         return PdfReader(packet)
 
     # Create watermark PDF
-watermark = create_watermark(watermark_text)
+    watermark = create_watermark(watermark_text)
     reader = PdfReader(file_path)
     writer = PdfWriter()
 
