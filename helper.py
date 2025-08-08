@@ -102,15 +102,16 @@ async def aio(url,name):
     return k
 
 
-async def download(url,name):
+async def download(url, name):
     ka = f'{name}.pdf'
     async with aiohttp.ClientSession() as session:
-async with session.get(url) as resp:
+        async with session.get(url) as resp:
             if resp.status == 200:
                 f = await aiofiles.open(ka, mode='wb')
                 await f.write(await resp.read())
                 await f.close()
     return ka
+
 
 async def pdf_download(url, file_name, chunk_size=1024 * 10):
     if os.path.exists(file_name):
